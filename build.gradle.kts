@@ -15,6 +15,7 @@ val projectPath = projectDir.absolutePath
 
 val jooqVersion = "3.11.11"
 val sqliteJDBCVersion = "3.27.2.1"
+val flywayVersion = "5.2.4"
 val jdbcUrl = "jdbc:sqlite:$projectPath/jExifToolGUI.db"
 val jdbcDriver = "org.sqlite.JDBC"
 
@@ -49,7 +50,6 @@ repositories {
 }
 
 
-
 dependencies {
 
     // Log4J and SLF4J configuration dependencies.
@@ -65,8 +65,10 @@ dependencies {
     // SQL dependencies - Using sqlite, jooq and flyway
     jooqRuntime(group = "org.xerial", name = "sqlite-jdbc", version = sqliteJDBCVersion)
 //    implementation(group = "org.xerial", name = "sqlite-jdbc", version = sqliteJDBCVersion)
-//    implementation(group = "org.jooq", name = "jooq", version = jooqVersion)
+    implementation(group = "org.jooq", name = "jooq", version = jooqVersion)
+    implementation(group = "javax.annotation", name="javax.annotation-api", version="1.3.2")
 
+    implementation(group = "org.flywaydb", name="flyway-core", version= flywayVersion)
 
     // Testing dependencies
     testImplementation(group = "junit", name = "junit", version = "4.12")
@@ -102,7 +104,6 @@ idea {
 
 // The jooq and flyway config is just for development.
 // Therefore, it is not bad to have the sqlite file in the project folder.
-/*
 jooq {
     version = jooqVersion
     edition = JooqEdition.OSS
@@ -119,36 +120,29 @@ jooq {
             name = "org.jooq.codegen.DefaultGenerator"
             strategy {
                 name = "org.jooq.codegen.DefaultGeneratorStrategy"
-                // ...
-
+            }
+            database {
+               excludes = "flyway_schema_history|sqlite_master"
             }
             generator {
-//                name = "org.jooq.codegen.DefaultGenerator"
-//                strategy {
-//                    name = "org.jooq.codegen.DefaultGeneratorStrategy"
-//                    // ...
-//                }
-                database {
-                    inputSchema = "main"
 
-                }
                 generate {
                     isRelations = true
                     isDeprecated = false
                     isRecords = true
-                    isImmutablePojos = true
                     isFluentSetters = true
+
+
                     // ...
                 }
                 target {
                     packageName = "org.hvdw.jexiftoolgui.jooq"
-                    // directory = ...
                 }
             }
         }
     }
 
-}*/
+}
 
 flyway {
     url = jdbcUrl

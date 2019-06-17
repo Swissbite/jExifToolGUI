@@ -9,3 +9,6 @@ build
 *.iml
 
 *.log
+
+// Ignore the DB, used for migration and development.
+jExifToolGUI.db

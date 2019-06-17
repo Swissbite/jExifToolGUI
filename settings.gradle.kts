@@ -8,3 +8,10 @@
  */
 
 rootProject.name = "jExifToolGUI"
+
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven(url = "https://jitpack.io")
+    }
+}

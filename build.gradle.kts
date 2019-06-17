@@ -1,3 +1,5 @@
+import nu.studer.gradle.jooq.*
+import nu.studer.gradle.jooq.JooqEdition
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -9,6 +11,13 @@ import java.util.Date
  * User Manual available at https://docs.gradle.org/5.4.1/userguide/tutorial_java_projects.html
  */
 
+val projectPath = projectDir.absolutePath
+
+val jooqVersion = "3.11.11"
+val sqliteJDBCVersion = "3.27.2.1"
+val jdbcUrl = "jdbc:sqlite:$projectPath/jExifToolGUI.db"
+val jdbcDriver = "org.sqlite.JDBC"
+
 plugins {
     // Apply the java plugin to add support for Java
     java
@@ -19,7 +28,13 @@ plugins {
     application
 
     //Shadow plugin for fatJar
-    id("com.github.johnrengelman.shadow") version ("5.0.0")
+    id("com.github.johnrengelman.shadow") version "5.0.0"
+
+    // Jooq Plugin for generating code out of database
+    id("com.github.kramerc.gradle-jooq-plugin") version "jitpack-SNAPSHOT"
+
+    // Migration tool for database.
+    id("org.flywaydb.flyway") version "5.2.4"
 }
 
 project.ext {
@@ -34,6 +49,7 @@ repositories {
 }
 
 
+
 dependencies {
 
     // Log4J and SLF4J configuration dependencies.
@@ -45,7 +61,13 @@ dependencies {
     implementation(group = "com.intellij", name = "forms_rt", version = "7.0.3")
 
     // Missing helpers and common utils in java
-    implementation(group="org.apache.commons", name="commons-lang3", version="3.9")
+    implementation(group = "org.apache.commons", name = "commons-lang3", version = "3.9")
+    // SQL dependencies - Using sqlite, jooq and flyway
+    jooqRuntime(group = "org.xerial", name = "sqlite-jdbc", version = sqliteJDBCVersion)
+//    implementation(group = "org.xerial", name = "sqlite-jdbc", version = sqliteJDBCVersion)
+//    implementation(group = "org.jooq", name = "jooq", version = jooqVersion)
+
+
     // Testing dependencies
     testImplementation(group = "junit", name = "junit", version = "4.12")
     testImplementation(group = "com.github.stefanbirkner", name = "system-rules", version = "1.19.0")
@@ -76,6 +98,64 @@ idea {
         outputDir = file("build/resources/main")
         testOutputDir = file("build/resources/test")
     }
+}
+
+// The jooq and flyway config is just for development.
+// Therefore, it is not bad to have the sqlite file in the project folder.
+/*
+jooq {
+    version = jooqVersion
+    edition = JooqEdition.OSS
+    dependencies {
+        runtime(group = "org.xerial", name = "sqlite-jdbc", version = sqliteJDBCVersion)
+
+    }
+    "jExifTool"(sourceSets["main"]) {
+        jdbc {
+            url = jdbcUrl
+            driver = jdbcDriver
+        }
+        generator {
+            name = "org.jooq.codegen.DefaultGenerator"
+            strategy {
+                name = "org.jooq.codegen.DefaultGeneratorStrategy"
+                // ...
+
+            }
+            generator {
+//                name = "org.jooq.codegen.DefaultGenerator"
+//                strategy {
+//                    name = "org.jooq.codegen.DefaultGeneratorStrategy"
+//                    // ...
+//                }
+                database {
+                    inputSchema = "main"
+
+                }
+                generate {
+                    isRelations = true
+                    isDeprecated = false
+                    isRecords = true
+                    isImmutablePojos = true
+                    isFluentSetters = true
+                    // ...
+                }
+                target {
+                    packageName = "org.hvdw.jexiftoolgui.jooq"
+                    // directory = ...
+                }
+            }
+        }
+    }
+
+}*/
+
+flyway {
+    url = jdbcUrl
+    dependencies {
+        runtime(group = "org.xerial", name = "sqlite-jdbc", version = sqliteJDBCVersion)
+    }
+
 }
 
 
